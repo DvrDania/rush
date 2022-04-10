@@ -1,3 +1,5 @@
+use std::fmt;
+
 use regex::Regex;
 
 #[derive(Debug, PartialEq)]
@@ -34,6 +36,12 @@ impl From<Rgb> for Hex {
         };
 
         Hex(format!("#{}{}{}", red, green, blue))
+    }
+}
+
+impl fmt::Display for Hex {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 

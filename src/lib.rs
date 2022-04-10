@@ -2,7 +2,7 @@ mod rush_core;
 
 use rush_core::Hex;
 
-pub fn start(args: Vec<String>) {
+pub fn run(args: Vec<String>) {
     if let 1 = args.len() {
         println!("Not enough arguments");
         return;
@@ -14,5 +14,14 @@ pub fn start(args: Vec<String>) {
             return;
         }
     };
-    let _shades = color.make_shades();
+    let shades = color.make_shades();
+    println!("{{");
+    for (i, shade) in shades.iter().enumerate() {
+        if i == 0 {
+            println!("      50: \"{shade}\",");
+        } else {
+            println!("      {}: \"{shade}\",", i * 100);
+        }
+    }
+    println!("}}");
 }
