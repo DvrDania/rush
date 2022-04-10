@@ -1,7 +1,7 @@
 use regex::Regex;
 
 #[derive(Debug, PartialEq)]
-pub struct Hex(pub String);
+pub struct Hex(String);
 
 impl TryFrom<String> for Hex {
     // TODO: better error type
@@ -15,11 +15,49 @@ impl TryFrom<String> for Hex {
         Ok(Hex(value))
     }
 }
+impl From<Rgb> for Hex {
+    fn from(color: Rgb) -> Self {
+        let red = if format!("{:x}", color.0).len() == 1 {
+            format!("0{:x}", color.0)
+        } else {
+            format!("{:x}", color.0)
+        };
+        let green = if format!("{:x}", color.1).len() == 1 {
+            format!("0{:x}", color.1)
+        } else {
+            format!("{:x}", color.1)
+        };
+        let blue = if format!("{:x}", color.2).len() == 1 {
+            format!("0{:x}", color.2)
+        } else {
+            format!("{:x}", color.2)
+        };
+
+        Hex(format!("#{}{}{}", red, green, blue))
+    }
+}
 
 impl Hex {
     pub fn make_shades(self) -> [Hex; 10] {
         let color = Rgb::from(self);
-        [(); 10].map(|_| Hex("#ffffff".to_string()))
+
+        let shade_50 = color.lighter(0.95);
+        let shade_100 = color.lighter(0.76);
+        let shade_200 = color.lighter(0.57);
+        let shade_300 = color.lighter(0.38);
+        let shade_400 = color.lighter(0.19);
+        let shade_500 = color.clone();
+        let shade_600 = color.darker(0.19);
+        let shade_700 = color.darker(0.38);
+        let shade_800 = color.darker(0.57);
+        let shade_900 = color.darker(0.76);
+
+        let shades_rgb = [
+            shade_50, shade_100, shade_200, shade_300, shade_400, shade_500, shade_600, shade_700,
+            shade_800, shade_900,
+        ];
+        let shades_hex = shades_rgb.map(|c| Hex::from(c));
+        shades_hex
     }
     fn get_red(&self) -> u8 {
         let color: String = self.0.split('#').collect();
@@ -59,7 +97,25 @@ impl Hex {
     }
 }
 
+#[derive(Clone, Copy)]
 struct Rgb(u8, u8, u8);
+
+impl Rgb {
+    fn lighter(&self, degree: f32) -> Self {
+        Rgb(
+            (self.0 as f32 + ((255 - self.0) as f32 * degree)).round() as u8,
+            (self.1 as f32 + ((255 - self.1) as f32 * degree)).round() as u8,
+            (self.2 as f32 + ((255 - self.2) as f32 * degree)).round() as u8,
+        )
+    }
+    fn darker(&self, degree: f32) -> Self {
+        Rgb(
+            (self.0 as f32 - (self.0 as f32 * degree)).round() as u8,
+            (self.1 as f32 - (self.1 as f32 * degree)).round() as u8,
+            (self.2 as f32 - (self.2 as f32 * degree)).round() as u8,
+        )
+    }
+}
 
 impl From<Hex> for Rgb {
     fn from(color: Hex) -> Self {
